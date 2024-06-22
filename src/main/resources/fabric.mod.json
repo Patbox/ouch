@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "ouch",
+  "version": "${version}",
+  "name": "Ouch!",
+  "description": "Customisable, server side damage indicator!",
+  "authors": [
+    "Patbox"
+  ],
+  "contact": {
+    "homepage": "https://pb4.eu",
+    "sources": "https://github.com/Patbox/ouch"
+  },
+
+  "license": "LGPLv3",
+  "icon": "assets/ouch/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "eu.pb4.ouch.ModInit"
+    ]
+  },
+  "mixins": [
+    "ouch.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": ">=1.21-",
+    "polymer-virtual-entity": ">=0.9.0",
+    "java": ">=21"
+  },
+  "breaks": {
+    "banner": "*",
+    "cardboard": "*",
+    "arclight": "*"
+  }
+}
