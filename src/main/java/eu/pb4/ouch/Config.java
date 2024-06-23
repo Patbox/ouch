@@ -24,11 +24,10 @@ public record Config(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
             DeathDisplayLogic.CODEC.listOf().listOf().fieldOf("death").forGetter(Config::death)
     ).apply(instance, Config::new));
 
-    @Nullable
     public void selectDamage(LivingEntity entity, DamageSource source, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         var predicateContext = PredicateContext.of(entity);
         var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
-        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
+        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
         for (var a : this.damage) {
             for (var e : a) {
                 if (e.match(entity, source, predicateContext, attackerContext, sourceContext)) {
@@ -39,11 +38,10 @@ public record Config(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
         }
     }
 
-    @Nullable
     public void selectDeath(LivingEntity entity, DamageSource source, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         var predicateContext = PredicateContext.of(entity);
         var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
-        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
+        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
         for (var a : this.death) {
             for (var e : a) {
                 if (e.match(entity, source, predicateContext, attackerContext, sourceContext)) {
@@ -55,7 +53,6 @@ public record Config(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
 
     }
 
-    @Nullable
     public void selectHealing(LivingEntity entity, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         var predicateContext = PredicateContext.of(entity);
         for (var a : this.healing) {
