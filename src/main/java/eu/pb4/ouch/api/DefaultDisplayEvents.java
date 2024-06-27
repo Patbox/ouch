@@ -1,13 +1,13 @@
 package eu.pb4.ouch.api;
 
+import eu.pb4.predicate.api.BuiltinPredicates;
+import eu.pb4.predicate.api.MinecraftPredicate;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.TagKey;
 import org.jetbrains.annotations.ApiStatus;
-
-import java.util.List;
 
 public final class DefaultDisplayEvents {
 
@@ -25,51 +25,93 @@ public final class DefaultDisplayEvents {
 	 * }
 	 * </pre>
 	 */
-	public static final Event<AppendDisplayLogic> APPEND_DISPLAY_LOGIC = EventFactory.createArrayBacked(AppendDisplayLogic.class, callbacks -> (lookup, _logics) -> {
-		AppendDisplayLogic.Logics logics = _logics;
+	public static final Event<AppendDisplayLogic> APPEND_DISPLAY_LOGIC = EventFactory.createArrayBacked(AppendDisplayLogic.class, callbacks -> (builder, preset) -> {
 		for (AppendDisplayLogic callback : callbacks) {
-			logics = callback.append(lookup, logics);
+			callback.append(builder, preset);
 		}
-		return logics;
-	});
-
-	/**
-	 * This event allows to modify a format applied on one or more {@link DamageType} for the default configuration.
-	 * Example:
-	 * <pre>
-	 * {@code
-	 *  DefaultDisplayEvents.MODIFY_DISPLAY_LOGIC.register((lookup, types, format) -> {
-	 *      if (types.contains(DamageTypes.OUT_OF_WORLD)) {
-	 *          return yourModifiedFormat;
-	 *      }
-	 *      return format;
-	 *  });
-	 * }
-	 * </pre>
-	 */
-	public static final Event<ModifyDisplayLogic> MODIFY_DISPLAY_LOGIC = EventFactory.createArrayBacked(ModifyDisplayLogic.class, callbacks -> (lookup, types, _format) -> {
-		String format = _format;
-		for (ModifyDisplayLogic callback : callbacks) {
-			format = callback.modify(lookup, types, format);
-		}
-		return format;
 	});
 
 	@FunctionalInterface
 	public interface AppendDisplayLogic {
 
-		Logics append(RegistryWrapper.WrapperLookup lookup, Logics logics);
+		void append(Builder builder, String preset);
 
 		@ApiStatus.NonExtendable
-		interface Logics {
+		@SuppressWarnings("unchecked")
+		interface Builder {
+			default void addDamage(String format, RegistryKey<DamageType>... types) {
+				addDamage(format, 1, types);
+			};
+			default void addDamage(int layer, String format, RegistryKey<DamageType>... types) {
+				addDamage(layer, format, 1, types);
+			}
+			default void addDamage(String format, TagKey<DamageType> tag) {
+				addDamage(format, 1, tag);
+			};;
+			default void addDamage(int layer, String format, TagKey<DamageType> tag) {
+				addDamage(layer, format, 1, tag);
+			}
 
-			void add(String format, RegistryKey<DamageType>... types);
+			default void addDamage(String format, float chance, RegistryKey<DamageType>... types) {
+				addDamage(0, format, chance, types);
+			}
+			default void addDamage(String format, float chance, TagKey<DamageType> tag) {
+				addDamage(0, format, chance, tag);
+			}
+			default void addDamage(int layer, String format, float chance, RegistryKey<DamageType>... types) {
+				addDamage(0, format, chance, BuiltinPredicates.alwaysTrue(), types);
+			};
+			default void addDamage(int layer, String format, float chance, TagKey<DamageType> tag) {
+				addDamage(0, format, chance, BuiltinPredicates.alwaysTrue(), tag);
+			}
+
+			default void addDamage(int layer, String format, float chance, MinecraftPredicate victimPredicate, RegistryKey<DamageType>... types) {
+				addDamage(layer, 100, format, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), types);
+			};
+			default void addDamage(int layer, String format, float chance, MinecraftPredicate victimPredicate, TagKey<DamageType> tag) {
+				addDamage(layer, 200, format, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), tag);
+			};
+
+			void addDamage(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types);
+			void addDamage(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag);
+
+			default void addDeath(String format, RegistryKey<DamageType>... types) {
+				addDeath(format, 1, types);
+			};
+			default void addDeath(int layer, String format, RegistryKey<DamageType>... types) {
+				addDeath(layer, format, 1, types);
+			}
+			default void addDeath(String format, TagKey<DamageType> tag) {
+				addDeath(format, 1, tag);
+			};;
+			default void addDeath(int layer, String format, TagKey<DamageType> tag) {
+				addDeath(layer, format, 1, tag);
+			}
+
+			default void addDeath(String format, float chance, RegistryKey<DamageType>... types) {
+				addDeath(0, format, chance, types);
+			}
+			default void addDeath(String format, float chance, TagKey<DamageType> tag) {
+				addDeath(0, format, chance, tag);
+			}
+			default void addDeath(int layer, String format, float chance, RegistryKey<DamageType>... types) {
+				addDeath(0, format, chance, BuiltinPredicates.alwaysTrue(), types);
+			};
+			default void addDeath(int layer, String format, float chance, TagKey<DamageType> tag) {
+				addDeath(0, format, chance, BuiltinPredicates.alwaysTrue(), tag);
+			}
+
+			default void addDeath(int layer, String format, float chance, MinecraftPredicate victimPredicate, RegistryKey<DamageType>... types) {
+				addDeath(layer, 100, format, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), types);
+			};
+			default void addDeath(int layer, String format, float chance, MinecraftPredicate victimPredicate, TagKey<DamageType> tag) {
+				addDeath(layer, 200, format, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), tag);
+			};
+
+			void addDeath(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types);
+			void addDeath(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag);
+
+			void addHealing(int layer, int priority, String format, float chance, MinecraftPredicate entityPredicate);
 		}
-	}
-
-	@FunctionalInterface
-	public interface ModifyDisplayLogic {
-
-		String modify(RegistryWrapper.WrapperLookup lookup, List<RegistryKey<DamageType>> types, String format);
 	}
 }

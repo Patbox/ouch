@@ -1,0 +1,18 @@
+{
+  "damage": [
+    [
+      {
+        "text": "<#ff0000>-${value}</>",
+        "type": []
+      }
+    ]
+  ],
+  "healing": [
+    [
+      {
+        "text": "<#00FF00>+${value}"
+      }
+    ]
+  ],
+  "death": []
+}

@@ -1,6 +1,5 @@
 package eu.pb4.ouch;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.placeholders.api.ParserContext;
@@ -12,14 +11,9 @@ import eu.pb4.predicate.api.MinecraftPredicate;
 import eu.pb4.predicate.api.PredicateContext;
 import eu.pb4.predicate.api.PredicateRegistry;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.RegistryCodecs;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -37,8 +31,8 @@ public record HealDisplayLogic(MinecraftPredicate entityPredicate,
             FloatingText.DisplaySettings.CODEC.orElse(FloatingText.DisplaySettings.GENERAL).forGetter(HealDisplayLogic::displaySettings)
     ).apply(instance, HealDisplayLogic::new));
 
-    public static HealDisplayLogic of(String format) {
-        return new HealDisplayLogic(BuiltinPredicates.alwaysTrue(), 1, WrappedText.from(PARSER, format), FloatingText.DisplaySettings.GENERAL);
+    public static HealDisplayLogic of(String format, float chance, MinecraftPredicate predicate) {
+        return new HealDisplayLogic(predicate, chance, WrappedText.from(PARSER, format), FloatingText.DisplaySettings.GENERAL);
     }
 
     public void provide(LivingEntity entity, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {

@@ -79,15 +79,15 @@ public class FloatingText extends ElementHolder {
     }
 
     public static void createDamage(LivingEntity entity, DamageSource source, float amount) {
-        Config.get().selectDamage(entity, source, amount, (text, displaySettings) -> createText(entity, source.getPosition(), text, displaySettings));
+        Preset.get().selectDamage(entity, source, amount, (text, displaySettings) -> createText(entity, source.getPosition(), text, displaySettings));
     }
 
     public static void createDeath(LivingEntity entity, DamageSource source) {
-        Config.get().selectDeath(entity, source, (text, displaySettings) -> createText(entity, source.getPosition(), text, displaySettings));
+        Preset.get().selectDeath(entity, source, (text, displaySettings) -> createText(entity, source.getPosition(), text, displaySettings));
     }
 
     public static void createHealing(LivingEntity entity, float amount) {
-        Config.get().selectHealing(entity, amount, (text, displaySettings) -> createText(entity, null, text, displaySettings));
+        Preset.get().selectHealing(entity, amount, (text, displaySettings) -> createText(entity, null, text, displaySettings));
     }
 
     private static void createText(LivingEntity entity, @Nullable Vec3d source, Text text, DisplaySettings displaySettings) {

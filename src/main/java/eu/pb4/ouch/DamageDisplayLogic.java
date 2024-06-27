@@ -2,7 +2,6 @@ package eu.pb4.ouch;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import eu.pb4.ouch.api.DefaultDisplayEvents;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
@@ -24,7 +23,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -76,43 +75,42 @@ public record DamageDisplayLogic(Optional<RegistryEntryList<DamageType>> type,
         );
     }
 
-    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, RegistryKey<DamageType> type, String format) {
-        return new DamageDisplayLogic(Optional.of(RegistryEntryList.of(wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE).getOrThrow(type))),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                1,
-                WrappedText.from(PARSER, DefaultDisplayEvents.MODIFY_DISPLAY_LOGIC.invoker().modify(wrapper, List.of(type), format)),
+    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... type) {
+        var x = wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE);
+        return new DamageDisplayLogic(Optional.of(RegistryEntryList.of(Arrays.stream(type).map(x::getOrThrow).toList())),
+                victimPredicate,
+                attackerPredicate,
+                sourcePredicate,
+                chance,
+                WrappedText.from(PARSER, format),
                 FloatingText.DisplaySettings.GENERAL
         );
     }
-    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, List<RegistryKey<DamageType>> type, String format) {
-        return new DamageDisplayLogic(Optional.of(RegistryEntryList.of(type.stream().map(wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE)::getOrThrow).toList())),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                1,
-                WrappedText.from(PARSER, DefaultDisplayEvents.MODIFY_DISPLAY_LOGIC.invoker().modify(wrapper, type, format)),
-                FloatingText.DisplaySettings.GENERAL
-        );
-    }
-
-    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, TagKey<DamageType> tag, String format) {
+    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
         return new DamageDisplayLogic(Optional.of(wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE).getOrThrow(tag)),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                1,
+                victimPredicate,
+                attackerPredicate,
+                sourcePredicate,
+                chance,
                 WrappedText.from(PARSER, format),
                 FloatingText.DisplaySettings.GENERAL
         );
     }
 
-    public void provide(LivingEntity entity, DamageSource source, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
+    public void provideDamage(LivingEntity entity, DamageSource source, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         consumer.accept(this.text.textNode().toText(PlaceholderContext.of(entity).asParserContext().with(PLACEHOLDER_KEY, key -> switch (key) {
             case "value" -> Text.literal(MathHelper.floor(amount) + "." + (MathHelper.floor(amount * 10) % 10));
             case "value_rounded" -> Text.literal("" + Math.round(amount));
             case "value_raw" -> Text.literal("" + amount);
+            case null, default -> Text.empty();
+        })), this.displaySettings);
+    }
+
+    public void provideDeath(LivingEntity entity, DamageSource source, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
+        consumer.accept(this.text.textNode().toText(PlaceholderContext.of(entity).asParserContext().with(PLACEHOLDER_KEY, key -> switch (key) {
+            case "message" -> source.getDeathMessage(entity);
+            case "victim" -> entity.getDisplayName();
+            case "attacker" -> source.getAttacker() != null ? source.getAttacker().getDisplayName() : Text.empty();
             case null, default -> Text.empty();
         })), this.displaySettings);
     }

@@ -1,0 +1,139 @@
+{
+  "damage": [
+    [
+      {
+        "text": "<#ff0000>-${value}</><yellow>☀",
+        "type": "minecraft:dry_out"
+      },
+      {
+        "text": "<#ff0000>-${value}</><aqua>🔱",
+        "type": "minecraft:trident"
+      },
+      {
+        "text": "<#ff0000>-${value}</><gray>☃",
+        "type": "minecraft:bad_respawn_point"
+      },
+      {
+        "text": "<#ff0000>-${value}</><dark_gray>🍖",
+        "type": "minecraft:starve"
+      },
+      {
+        "text": "<#ff0000>-${value}</><aqua>🔱",
+        "type": "minecraft:trident"
+      },
+      {
+        "text": "<#ff0000>-${value}</><red>♦",
+        "type": "minecraft:cramming"
+      },
+      {
+        "text": "<#ff0000>-${value}</><gray>☄",
+        "type": "minecraft:fall"
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>☄",
+        "type": "minecraft:fly_into_wall"
+      },
+      {
+        "text": "<#ff0000>-${value}</><gray>▒",
+        "type": "minecraft:in_wall"
+      },
+      {
+        "text": "<#ff0000>-${value}</><dark_aqua>☀",
+        "type": "minecraft:sonic_boom"
+      },
+      {
+        "text": "<#ff0000>-${value}</><white>☄",
+        "type": "minecraft:spit"
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>▽",
+        "type": "minecraft:sting"
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>△",
+        "type": "minecraft:thorns"
+      },
+      {
+        "text": "<#ff0000>-${value}</><light_gray>🗡",
+        "type": [
+          "minecraft:mob_attack",
+          "minecraft:player_attack",
+          "minecraft:mob_attack_no_aggro"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>⚠",
+        "type": [
+          "minecraft:out_of_world",
+          "minecraft:outside_border"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><purple>🧪",
+        "type": [
+          "minecraft:magic",
+          "minecraft:indirect_magic",
+          "minecraft:dragon_breath"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><dark_gray>🧪",
+        "type": [
+          "minecraft:wither",
+          "minecraft:wither_skull"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><dark_green>♦",
+        "type": [
+          "minecraft:cactus",
+          "minecraft:sweet_berry_bush"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><red>☄",
+        "type": [
+          "minecraft:falling_stalactite",
+          "minecraft:falling_anvil",
+          "minecraft:falling_block"
+        ]
+      },
+      {
+        "text": "<#ff0000>-${value}</><orange>🔥",
+        "type": "#minecraft:is_fire"
+      },
+      {
+        "text": "<#ff0000>-${value}</><white>☀",
+        "type": "#minecraft:is_explosion"
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>🏹",
+        "type": "#minecraft:is_projectile"
+      },
+      {
+        "text": "<#ff0000>-${value}</><blue>🌊",
+        "type": "#minecraft:is_drowning"
+      },
+      {
+        "text": "<#ff0000>-${value}</><white>❄",
+        "type": "#minecraft:is_freezing"
+      },
+      {
+        "text": "<#ff0000>-${value}</><yellow>⚡",
+        "type": "#minecraft:is_lightning"
+      },
+      {
+        "text": "<#ff0000>-${value}</>",
+        "type": []
+      }
+    ]
+  ],
+  "healing": [
+    [
+      {
+        "text": "<#00FF00>+${value}"
+      }
+    ]
+  ],
+  "death": []
+}

@@ -15,6 +15,17 @@ It can also display multiple particles with different setting for same damage, a
 
 # Configuration.
 This mod config file is stored as `./config/ouch.json`.
+## Preset selection config.
+By default, config is in a format of preset selection, allowing you to choose default style/look that's built into the mod.
+```json5
+{
+  "preset": "default"
+}
+```
+Available presets: `default`, `minimal`
+## Full config.
+This config allows you to change any text and it's behaviour. Can be used for advanced configuration.
+Default values used by presets can be found here: https://github.com/Patbox/ouch/tree/master/preset
 All custom text within it uses the [QuickText format](https://placeholders.pb4.eu/user/quicktext/). 
 All predicates use are supplied by [Predicate API, using this format](https://github.com/Patbox/PredicateAPI/blob/1.21/BUILTIN.md).
 Lines prefixed with `//` aren't part of real config and are here just to explain it.
