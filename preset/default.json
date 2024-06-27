@@ -2,6 +2,11 @@
   "damage": [
     [
       {
+        "max_value": -1.0E-4,
+        "text": "<#ff0000>+${value} </><gray>¯\\\\_(ツ)_/¯",
+        "type": []
+      },
+      {
         "text": "<#ff0000>-${value}</><yellow>☀",
         "type": "minecraft:dry_out"
       },
@@ -130,6 +135,10 @@
   ],
   "healing": [
     [
+      {
+        "text": "<#00FF00>${value} </><gray>¯\\\\_(ツ)_/¯",
+        "max_value": -1.0E-4
+      },
       {
         "text": "<#00FF00>+${value}"
       }

@@ -2,6 +2,7 @@ package eu.pb4.ouch;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import eu.pb4.ouch.api.FloatRange;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
@@ -32,12 +33,13 @@ public record DamageDisplayLogic(Optional<RegistryEntryList<DamageType>> type,
                                  MinecraftPredicate victimPredicate,
                                  MinecraftPredicate attackerPredicate,
                                  MinecraftPredicate sourcePredicate,
+                                 FloatRange range,
                                  float chance,
                                  WrappedText text,
                                  FloatingText.DisplaySettings displaySettings) {
     static final ParserContext.Key<Function<String, Text>> PLACEHOLDER_KEY = ParserContext.Key.of("ouch:placeholder");
 
-    static final NodeParser PARSER = NodeParser.builder()
+    public static final NodeParser PARSER = NodeParser.builder()
             .quickText()
             .placeholders(TagLikeParser.PLACEHOLDER_USER, PLACEHOLDER_KEY)
             .staticPreParsing()
@@ -48,49 +50,31 @@ public record DamageDisplayLogic(Optional<RegistryEntryList<DamageType>> type,
             PredicateRegistry.CODEC.optionalFieldOf("victim", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::victimPredicate),
             PredicateRegistry.CODEC.optionalFieldOf("attacker", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::attackerPredicate),
             PredicateRegistry.CODEC.optionalFieldOf("source", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::sourcePredicate),
+            FloatRange.CODEC.orElse(FloatRange.ALL).forGetter(DamageDisplayLogic::range),
             Codec.floatRange(0, 1).optionalFieldOf("chance", 1f).forGetter(DamageDisplayLogic::chance),
             PARSER.codec().fieldOf("text").forGetter(DamageDisplayLogic::text),
             FloatingText.DisplaySettings.CODEC.orElse(FloatingText.DisplaySettings.GENERAL).forGetter(DamageDisplayLogic::displaySettings)
     ).apply(instance, DamageDisplayLogic::new));
 
-    public static DamageDisplayLogic of(String format) {
-        return new DamageDisplayLogic(Optional.empty(),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                1,
-                WrappedText.from(PARSER, format),
-                FloatingText.DisplaySettings.GENERAL
-        );
-    }
 
-    public static DamageDisplayLogic of(float chance, MinecraftPredicate predicate, String format) {
-        return new DamageDisplayLogic(Optional.empty(),
-                predicate,
-                BuiltinPredicates.alwaysTrue(),
-                BuiltinPredicates.alwaysTrue(),
-                chance,
-                WrappedText.from(PARSER, format),
-                FloatingText.DisplaySettings.GENERAL
-        );
-    }
-
-    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... type) {
+    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... type) {
         var x = wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE);
         return new DamageDisplayLogic(Optional.of(RegistryEntryList.of(Arrays.stream(type).map(x::getOrThrow).toList())),
                 victimPredicate,
                 attackerPredicate,
                 sourcePredicate,
+                range,
                 chance,
                 WrappedText.from(PARSER, format),
                 FloatingText.DisplaySettings.GENERAL
         );
     }
-    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
+    public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
         return new DamageDisplayLogic(Optional.of(wrapper.getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE).getOrThrow(tag)),
                 victimPredicate,
                 attackerPredicate,
                 sourcePredicate,
+                range,
                 chance,
                 WrappedText.from(PARSER, format),
                 FloatingText.DisplaySettings.GENERAL
@@ -115,8 +99,9 @@ public record DamageDisplayLogic(Optional<RegistryEntryList<DamageType>> type,
         })), this.displaySettings);
     }
 
-    public boolean match(LivingEntity entity, DamageSource source, PredicateContext predicateContext, PredicateContext attackerContext, PredicateContext sourceContext) {
+    public boolean match(LivingEntity entity, float amount, DamageSource source, PredicateContext predicateContext, PredicateContext attackerContext, PredicateContext sourceContext) {
         return (this.type.isEmpty() || this.type.get().contains(source.getTypeRegistryEntry()))
+                && this.range.test(amount)
                 && this.victimPredicate.test(predicateContext).success()
                 && this.attackerPredicate.test(attackerContext).success()
                 && this.sourcePredicate.test(sourceContext).success()

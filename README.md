@@ -57,6 +57,12 @@ Lines prefixed with `//` aren't part of real config and are here just to explain
         "source": {
           "type": "..."
         },
+        // [Optional] A minimal amount of damage required for this to display.
+        // By default, not set.
+        "min_value": 0,
+        // [Optional] A maximal amount of damage allowed for this to display.
+        // By default, not set.
+        "max_value": 999999,
         // [Optional] A floating point number from 0 to 1 (inclusive) describing change
         // this message is selected. 1 means it's always selected if other properties match,
         // 0.5 is 50% and 0 is never.
@@ -115,6 +121,12 @@ Lines prefixed with `//` aren't part of real config and are here just to explain
         "source": {
           "type": "..."
         },
+        // [Optional] A minimal amount of healing required for this to display.
+        // By default, not set.
+        "min_value": 0,
+        // [Optional] A maximal amount of healing allowed for this to display.
+        // By default, not set.
+        "max_value": 999999,
         // [Optional] A floating point number from 0 to 1 (inclusive) describing change
         // this message is selected. 1 means it's always selected if other properties match,
         // 0.5 is 50% and 0 is never.

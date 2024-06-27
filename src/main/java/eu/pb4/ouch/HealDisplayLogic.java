@@ -2,6 +2,7 @@ package eu.pb4.ouch;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import eu.pb4.ouch.api.FloatRange;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
@@ -18,6 +19,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public record HealDisplayLogic(MinecraftPredicate entityPredicate,
+                               FloatRange range,
                                float chance,
                                WrappedText text, FloatingText.DisplaySettings displaySettings) {
     private static final ParserContext.Key<Function<String, Text>> PLACEHOLDER_KEY = DamageDisplayLogic.PLACEHOLDER_KEY;
@@ -26,13 +28,14 @@ public record HealDisplayLogic(MinecraftPredicate entityPredicate,
 
     public static final Codec<HealDisplayLogic> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             PredicateRegistry.CODEC.optionalFieldOf("entity", BuiltinPredicates.alwaysTrue()).forGetter(HealDisplayLogic::entityPredicate),
+            FloatRange.CODEC.orElse(FloatRange.ALL).forGetter(HealDisplayLogic::range),
             Codec.floatRange(0, 1).optionalFieldOf("chance", 1f).forGetter(HealDisplayLogic::chance),
             PARSER.codec().fieldOf("text").forGetter(HealDisplayLogic::text),
             FloatingText.DisplaySettings.CODEC.orElse(FloatingText.DisplaySettings.GENERAL).forGetter(HealDisplayLogic::displaySettings)
     ).apply(instance, HealDisplayLogic::new));
 
-    public static HealDisplayLogic of(String format, float chance, MinecraftPredicate predicate) {
-        return new HealDisplayLogic(predicate, chance, WrappedText.from(PARSER, format), FloatingText.DisplaySettings.GENERAL);
+    public static HealDisplayLogic of(String format, FloatRange range, float chance, MinecraftPredicate predicate) {
+        return new HealDisplayLogic(predicate, range, chance, WrappedText.from(PARSER, format), FloatingText.DisplaySettings.GENERAL);
     }
 
     public void provide(LivingEntity entity, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
@@ -44,7 +47,7 @@ public record HealDisplayLogic(MinecraftPredicate entityPredicate,
         })), this.displaySettings);
     }
 
-    public boolean match(LivingEntity entity, PredicateContext predicateContext) {
-        return this.entityPredicate.test(predicateContext).success() && entity.getRandom().nextFloat() <= this.chance;
+    public boolean match(LivingEntity entity, float amount, PredicateContext predicateContext) {
+        return this.entityPredicate.test(predicateContext).success() && this.range.test(amount) && entity.getRandom().nextFloat() <= this.chance;
     }
 }

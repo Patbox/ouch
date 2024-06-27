@@ -58,21 +58,25 @@ public interface Presets {
         builder.addDamage("<#ff0000>-${value}</><blue>\uD83C\uDF0A", DamageTypeTags.IS_DROWNING);
         builder.addDamage("<#ff0000>-${value}</><white>❄", DamageTypeTags.IS_FREEZING);
         builder.addDamage("<#ff0000>-${value}</><yellow>⚡", DamageTypeTags.IS_LIGHTNING);
-        builder.addDamage(0, 1000, "<#ff0000>-${value}</>", 1, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue());
-        builder.addHealing(0, 1000, "<#00FF00>+${value}", 1, BuiltinPredicates.alwaysTrue());
+        builder.addDamage(0, 1000, "<#ff0000>-${value}</>", FloatRange.ALL, 1, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue());
 
-        DefaultDisplayEvents.APPEND_DISPLAY_LOGIC.invoker().append(builder, DEFAULT);
+
+        builder.addDamage(0, -10, "<#ff0000>+${value} </><gray>¯\\\\_(ツ)_/¯", FloatRange.below(-0.0001f), 1, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue());
+        builder.addHealing(0, -10, "<#00FF00>${value} </><gray>¯\\\\_(ツ)_/¯", FloatRange.below(-0.0001f), 1, BuiltinPredicates.alwaysTrue());
+        builder.addHealing(0, 1000, "<#00FF00>+${value}", FloatRange.ALL, 1, BuiltinPredicates.alwaysTrue());
+
+        PresetCreationEvents.APPEND.invoker().append(builder, DEFAULT);
         return builder;
     }
 
     static BuilderImpl createMinimal(BuilderImpl builder) {
-        builder.addDamage(0, 1000, "<#ff0000>-${value}</>", 1, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue());
-        builder.addHealing(0, 1000, "<#00FF00>+${value}", 1, BuiltinPredicates.alwaysTrue());
-        //DefaultDisplayEvents.APPEND_DISPLAY_LOGIC.invoker().append(builder, MINIMAL);
+        builder.addDamage(0, 1000, "<#ff0000>-${value}</>", FloatRange.ALL, 1,  BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue());
+        builder.addHealing(0, 1000, "<#00FF00>+${value}", FloatRange.ALL, 1, BuiltinPredicates.alwaysTrue());
+        //PresetCreationEvents.APPEND_DISPLAY_LOGIC.invoker().append(builder, MINIMAL);
         return builder;
     }
 
-    class BuilderImpl implements DefaultDisplayEvents.AppendDisplayLogic.Builder {
+    class BuilderImpl implements PresetCreationEvents.AppendDisplayLogic.Builder {
         RegistryWrapper.WrapperLookup lookup;
         Int2ObjectMap<List<Pair<Integer, DamageDisplayLogic>>> damageDisplays = new Int2ObjectOpenHashMap<>();
         Int2ObjectMap<List<Pair<Integer, HealDisplayLogic>>> healingDisplays = new Int2ObjectOpenHashMap<>();
@@ -87,19 +91,20 @@ public interface Presets {
             var damage = new ArrayList<List<DamageDisplayLogic>>();
             var healing = new ArrayList<List<HealDisplayLogic>>();
 
-            sortAndAdd(damage, this.damageDisplays, DamageDisplayLogic::chance, DamageDisplayLogic::type);
-            sortAndAdd(death, this.deathDisplays, DamageDisplayLogic::chance, DamageDisplayLogic::type);
-            sortAndAdd(healing, this.healingDisplays, HealDisplayLogic::chance, x -> Optional.empty());
+            sortAndAdd(damage, this.damageDisplays, DamageDisplayLogic::chance, DamageDisplayLogic::type, DamageDisplayLogic::range);
+            sortAndAdd(death, this.deathDisplays, DamageDisplayLogic::chance, DamageDisplayLogic::type, DamageDisplayLogic::range);
+            sortAndAdd(healing, this.healingDisplays, HealDisplayLogic::chance, x -> Optional.empty(), HealDisplayLogic::range);
 
             return new Preset(damage, healing, death);
         }
 
         private static <T> void sortAndAdd(List<List<T>> out, Int2ObjectMap<List<Pair<Integer, T>>> entries, Function<T, Float> chance,
-                                    Function<T, Optional<RegistryEntryList<DamageType>>> damageTypes) {
+                                    Function<T, Optional<RegistryEntryList<DamageType>>> damageTypes, Function<T, FloatRange> range) {
             var entriesList = new ArrayList<>(entries.int2ObjectEntrySet());
             var comparator = Comparator.<Pair<Integer, T>>comparingInt(Pair::getFirst)
                     .thenComparingInt(x -> damageTypes.apply(x.getSecond()).map(registryEntries -> registryEntries.getTagKey().isPresent() ? 3 : 1).orElse(5))
-                    .thenComparingDouble(x -> chance.apply(x.getSecond()));
+                    .thenComparingDouble(x -> chance.apply(x.getSecond()))
+                    .thenComparingDouble(x -> range.apply(x.getSecond()).size());
 
             entriesList.sort(Comparator.comparing(Int2ObjectMap.Entry::getIntKey));
             for (var x : entriesList) {
@@ -109,33 +114,33 @@ public interface Presets {
         }
 
         @Override
-        public void addDamage(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
+        public void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
             this.damageDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
-                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
+                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
         }
 
         @Override
-        public void addDamage(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
+        public void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
             this.damageDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
-                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, chance, victimPredicate, sourcePredicate, attackerPredicate, tag)));
+                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, tag)));
         }
 
         @Override
-        public void addDeath(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
+        public void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
             this.deathDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
-                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
+                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
         }
 
         @Override
-        public void addDeath(int layer, int priority, String format, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
+        public void addDeath(int layer, int priority, String format, FloatRange range,  float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag) {
             this.deathDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
-                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, chance, victimPredicate, sourcePredicate, attackerPredicate, tag)));
+                    .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, tag)));
         }
 
         @Override
-        public void addHealing(int layer, int priority, String format, float chance, MinecraftPredicate entityPredicate) {
+        public void addHealing(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate entityPredicate) {
             this.healingDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
-                    .add(new Pair<>(priority, HealDisplayLogic.of(format, chance, entityPredicate)));
+                    .add(new Pair<>(priority, HealDisplayLogic.of(format, range, chance, entityPredicate)));
         }
     }
 }

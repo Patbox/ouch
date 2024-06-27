@@ -32,7 +32,7 @@ public record Preset(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
         var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
         for (var a : this.damage) {
             for (var e : a) {
-                if (e.match(entity, source, predicateContext, attackerContext, sourceContext)) {
+                if (e.match(entity, amount, source, predicateContext, attackerContext, sourceContext)) {
                     e.provideDamage(entity, source, amount, consumer);
                     break;
                 }
@@ -46,7 +46,7 @@ public record Preset(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
         var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
         for (var a : this.death) {
             for (var e : a) {
-                if (e.match(entity, source, predicateContext, attackerContext, sourceContext)) {
+                if (e.match(entity, 0, source, predicateContext, attackerContext, sourceContext)) {
                     e.provideDeath(entity, source, consumer);
                     break;
                 }
@@ -59,7 +59,7 @@ public record Preset(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
         var predicateContext = PredicateContext.of(entity);
         for (var a : this.healing) {
             for (var e : a) {
-                if (e.match(entity, predicateContext)) {
+                if (e.match(entity, amount, predicateContext)) {
                     e.provide(entity, amount, consumer);
                     break;
                 }
