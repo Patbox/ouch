@@ -1,9 +1,13 @@
 package eu.pb4.ouch;
 
+import eu.pb4.ouch.api.DefaultDisplayEvents;
 import eu.pb4.predicate.api.BuiltinPredicates;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +46,10 @@ public interface DefaultDisplay {
         damage.add(DamageDisplayLogic.of("<#ff0000>-${value}</>"));
 
         heal.add(HealDisplayLogic.of("<#00FF00>+${value}"));
+
+        LogicsImpl logics = new LogicsImpl();
+        DefaultDisplayEvents.APPEND_DISPLAY_LOGIC.invoker().append(lookup, logics);
+        logics.getLogics().forEach(pair -> damage.add(DamageDisplayLogic.of(lookup, pair.getLeft(), pair.getRight())));
     }
 
     static void createShowcase(List<DamageDisplayLogic> damage, List<HealDisplayLogic> heal, List<DeathDisplayLogic> death,
@@ -50,5 +58,20 @@ public interface DefaultDisplay {
 
         death.add(DeathDisplayLogic.of("<red>${message}"));
         damageExtra.add(DamageDisplayLogic.of(0.03f, BuiltinPredicates.alwaysTrue(), "<white>Ouch!"));
+    }
+
+    class LogicsImpl implements DefaultDisplayEvents.AppendDisplayLogic.Logics {
+
+        final List<Pair<List<RegistryKey<DamageType>>, String>> logics = new ArrayList<>();
+
+        @Override
+        @SafeVarargs
+        public final void add(String format, RegistryKey<DamageType>... types) {
+            this.logics.add(new Pair<>(List.of(types), format));
+        }
+
+        List<Pair<List<RegistryKey<DamageType>>, String>> getLogics() {
+            return this.logics;
+        }
     }
 }
