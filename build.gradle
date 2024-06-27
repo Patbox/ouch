@@ -81,7 +81,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation include('eu.pb4:polymer-virtual-entity:0.9.2+1.21')
-	modImplementation include("eu.pb4:placeholder-api:2.4.0-pre.2+1.21")
+	modImplementation include("eu.pb4:placeholder-api:2.4.0+1.21")
 	modImplementation include('eu.pb4:predicate-api:0.5.2+1.21')
 }
 
