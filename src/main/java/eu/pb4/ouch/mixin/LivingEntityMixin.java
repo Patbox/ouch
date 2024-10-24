@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +23,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
-    private void onDamageApplied(DamageSource source, float amount, CallbackInfo ci) {
+    private void onDamageApplied(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
         if (!this.getWorld().isClient) {
             FloatingText.createDamage((LivingEntity) (Object) this, source, amount);
         }

@@ -28,19 +28,19 @@ public abstract class ArmorStandEntityMixin extends LivingEntity {
     }
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/decoration/ArmorStandEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;Lnet/minecraft/entity/Entity;)V"))
-    private void onDamageApplied2(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onDamageApplied2(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.createText(source, amount);
     }
 
-    @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/decoration/ArmorStandEntity;kill()V"))
-    private void onDamageApplied3(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/decoration/ArmorStandEntity;kill(Lnet/minecraft/server/world/ServerWorld;)V"))
+    private void onDamageApplied3(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.createText(source, amount);
     }
 
     @Unique
     private void createText(DamageSource source, float amount) {
         if (!this.getWorld().isClient) {
-            amount = DamageUtil.getDamageLeft(this, amount, source, (float) this.getArmor(), (float) this.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+            amount = DamageUtil.getDamageLeft(this, amount, source, (float) this.getArmor(), (float) this.getAttributeValue(EntityAttributes.ARMOR_TOUGHNESS));
             FloatingText.createDamage(this, source, amount);
         }
     }
