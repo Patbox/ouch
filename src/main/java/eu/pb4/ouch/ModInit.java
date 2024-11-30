@@ -3,12 +3,13 @@ package eu.pb4.ouch;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
+import com.google.gson.Strictness;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,20 +47,21 @@ public class ModInit implements ModInitializer {
 			LOGGER.warn("=====================================================");
 		}
 
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> this.setup(server.getRegistryManager()));
+		ServerLifecycleEvents.SERVER_STARTED.register(this::setup);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			config = Preset.EMPTY;
 			configValue = null;
 			PRESETS.clear();
 		});
-		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> this.setup(server.getRegistryManager()));
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> this.setup(server));
 	}
 
 	@SuppressWarnings("ConstantValue")
-	private void setup(DynamicRegistryManager.Immutable registryManager) {
+	private void setup(MinecraftServer server) {
+		var registryManager = server.getRegistryManager();
 		PRESETS.clear();
 		Presets.setupPresets(PRESETS::put, registryManager);
-		var gson = new GsonBuilder().disableHtmlEscaping().setLenient().setPrettyPrinting().create();
+		var gson = new GsonBuilder().disableHtmlEscaping().setStrictness(Strictness.LENIENT).setPrettyPrinting().create();
 
 		if (DEV_MODE) {
 			var path = FabricLoader.getInstance().getGameDir().resolve("../preset");
@@ -93,6 +95,20 @@ public class ModInit implements ModInitializer {
 		}
 
 		config = configValue.map(x -> PRESETS.getOrDefault(x, Preset.EMPTY), Function.identity());
+		try {
+			if (server.getHostProfile() != null && server.getHostProfile().getName().equals("Patbox")) {
+				var folder = FabricLoader.getInstance().getGameDir().resolve("ouch_export");
+				Files.createDirectories(folder);
+				for (var x : PRESETS.entrySet()) {
+					Files.writeString(folder.resolve(x.getKey() + ".json"), gson.toJson(Preset.SELF_CODEC.encodeStart(
+							registryManager.getOps(JsonOps.INSTANCE), x.getValue()
+					).getOrThrow()), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error("e", e);
+		}
+
 
 		try {
 			Files.writeString(configPath, gson.toJson(Preset.CODEC.encodeStart(
