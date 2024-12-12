@@ -59,7 +59,7 @@ public record DamageDisplayLogic(Optional<RegistryEntryList<DamageType>> type,
 
     public static DamageDisplayLogic of(RegistryWrapper.WrapperLookup wrapper, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... type) {
         var x = wrapper.getOrThrow(RegistryKeys.DAMAGE_TYPE);
-        return new DamageDisplayLogic(Optional.of(RegistryEntryList.of(Arrays.stream(type).map(x::getOrThrow).toList())),
+        return new DamageDisplayLogic(type.length == 0 ? Optional.empty() : Optional.of(RegistryEntryList.of(Arrays.stream(type).map(x::getOrThrow).toList())),
                 victimPredicate,
                 attackerPredicate,
                 sourcePredicate,

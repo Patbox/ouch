@@ -3,8 +3,7 @@
     [
       {
         "max_value": -1.0E-4,
-        "text": "<#ff0000>+${value} </><gray>¯\\\\_(ツ)_/¯",
-        "type": []
+        "text": "<#ff0000>+${value} </><gray>¯\\\\_(ツ)_/¯"
       },
       {
         "text": "<#ff0000>-${value}</><yellow>☀",
@@ -57,6 +56,10 @@
       {
         "text": "<#ff0000>-${value}</><yellow>△",
         "type": "minecraft:thorns"
+      },
+      {
+        "text": "<#ff0000>-${value}</><blue>🔨",
+        "type": "minecraft:mace_smash"
       },
       {
         "text": "<#ff0000>-${value}</><light_gray>🗡",
@@ -128,8 +131,7 @@
         "type": "#minecraft:is_lightning"
       },
       {
-        "text": "<#ff0000>-${value}</>",
-        "type": []
+        "text": "<#ff0000>-${value}</>"
       }
     ]
   ],

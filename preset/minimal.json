@@ -2,8 +2,7 @@
   "damage": [
     [
       {
-        "text": "<#ff0000>-${value}</>",
-        "type": []
+        "text": "<#ff0000>-${value}</>"
       }
     ]
   ],

@@ -44,6 +44,7 @@ public interface Presets {
         builder.addDamage("<#ff0000>-${value}</><white>☄", DamageTypes.SPIT);
         builder.addDamage("<#ff0000>-${value}</><yellow>▽", DamageTypes.STING);
         builder.addDamage("<#ff0000>-${value}</><yellow>△", DamageTypes.THORNS);
+        builder.addDamage("<#ff0000>-${value}</><blue>\uD83D\uDD28", DamageTypes.MACE_SMASH);
 
         builder.addDamage("<#ff0000>-${value}</><light_gray>\uD83D\uDDE1", DamageTypes.MOB_ATTACK, DamageTypes.PLAYER_ATTACK, DamageTypes.MOB_ATTACK_NO_AGGRO);
         builder.addDamage("<#ff0000>-${value}</><yellow>⚠", DamageTypes.OUT_OF_WORLD, DamageTypes.OUTSIDE_BORDER);
