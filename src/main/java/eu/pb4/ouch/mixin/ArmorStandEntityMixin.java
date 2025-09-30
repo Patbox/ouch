@@ -39,7 +39,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntity {
 
     @Unique
     private void createText(DamageSource source, float amount) {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             amount = DamageUtil.getDamageLeft(this, amount, source, (float) this.getArmor(), (float) this.getAttributeValue(EntityAttributes.ARMOR_TOUGHNESS));
             FloatingText.createDamage(this, source, amount);
         }

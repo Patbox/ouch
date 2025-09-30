@@ -50,7 +50,7 @@ public class FloatingText extends ElementHolder {
 
     @Override
     protected void onTick() {
-        if (!this.entity.getWorld().getTickManager().shouldTick()) {
+        if (!this.entity.getEntityWorld().getTickManager().shouldTick()) {
             return;
         }
         super.onTick();
@@ -92,13 +92,13 @@ public class FloatingText extends ElementHolder {
 
     private static void createText(LivingEntity entity, @Nullable Vec3d source, Text text, DisplaySettings displaySettings) {
         var random = entity.getRandom();
-        var velocity = displaySettings.velocityOverride().isPresent() ? displaySettings.velocityOverride().get() : (source != null ? source.subtract(entity.getPos())
+        var velocity = displaySettings.velocityOverride().isPresent() ? displaySettings.velocityOverride().get() : (source != null ? source.subtract(entity.getEntityPos())
                 .withAxis(Direction.Axis.Y, 0)
                 : new Vec3d(random.nextFloat() - 0.5, 0, random.nextFloat() - 0.5)
         ).normalize().rotateY((random.nextFloat() - 0.5f) * 80 * MathHelper.RADIANS_PER_DEGREE).multiply(0.35).add(0, 0.2, 0) ;
 
         var model = new FloatingText(entity, displaySettings, text, velocity);
-        ChunkAttachment.ofTicking(model, (ServerWorld) entity.getWorld(), entity.getPos());
+        ChunkAttachment.ofTicking(model, (ServerWorld) entity.getEntityWorld(), entity.getEntityPos());
     }
 
     public record DisplaySettings(float perTickVelocityMultiplier, float gravity, int stayingTime, float scale, Optional<Vec3d> velocityOverride) {

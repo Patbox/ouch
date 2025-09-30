@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10.+'
+	id 'fabric-loom' version '1.11.+'
 	id "com.modrinth.minotaur" version "2.+"
 	id 'maven-publish'
 }
@@ -60,9 +60,9 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation include('eu.pb4:polymer-virtual-entity:0.13.1+1.21.6')
-	modImplementation include("eu.pb4:placeholder-api:2.7.0+1.21.6")
-	modImplementation include('eu.pb4:predicate-api:0.6.0+1.21.2')
+	modImplementation include('eu.pb4:polymer-virtual-entity:0.14.0-rc.2+1.21.9-rc1')
+	modImplementation include("eu.pb4:placeholder-api:2.8.0+1.21.9")
+	modImplementation include('eu.pb4:predicate-api:0.6.1+1.21.9')
 }
 
 processResources {

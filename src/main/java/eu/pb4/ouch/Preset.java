@@ -28,8 +28,8 @@ public record Preset(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
 
     public void selectDamage(LivingEntity entity, DamageSource source, float amount, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         var predicateContext = PredicateContext.of(entity);
-        var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
-        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
+        var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getEntityWorld().getServer()));
+        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getEntityWorld().getServer()));
         for (var a : this.damage) {
             for (var e : a) {
                 if (e.match(entity, amount, source, predicateContext, attackerContext, sourceContext)) {
@@ -42,8 +42,8 @@ public record Preset(List<List<DamageDisplayLogic>> damage, List<List<HealDispla
 
     public void selectDeath(LivingEntity entity, DamageSource source, BiConsumer<Text, FloatingText.DisplaySettings> consumer) {
         var predicateContext = PredicateContext.of(entity);
-        var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
-        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getServer()));
+        var attackerContext = source.getAttacker() != null ? PredicateContext.of(source.getAttacker()) : PredicateContext.of(Objects.requireNonNull(entity.getEntityWorld().getServer()));
+        var sourceContext = source.getSource() != null ? PredicateContext.of(source.getSource()) : PredicateContext.of(Objects.requireNonNull(entity.getEntityWorld().getServer()));
         for (var a : this.death) {
             for (var e : a) {
                 if (e.match(entity, 0, source, predicateContext, attackerContext, sourceContext)) {

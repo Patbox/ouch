@@ -23,7 +23,7 @@ public abstract class PlayerEntityMixin extends Entity {
 
     @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
     private void onDamageApplied(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             FloatingText.createDamage((LivingEntity) (Object) this, source, amount);
         }
     }

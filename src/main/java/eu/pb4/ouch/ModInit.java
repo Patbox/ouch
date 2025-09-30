@@ -96,7 +96,7 @@ public class ModInit implements ModInitializer {
 
 		config = configValue.map(x -> PRESETS.getOrDefault(x, Preset.EMPTY), Function.identity());
 		try {
-			if (server.getHostProfile() != null && server.getHostProfile().getName().equals("Patbox")) {
+			if (server.getHostProfile() != null && server.getHostProfile().name().equals("Patbox")) {
 				var folder = FabricLoader.getInstance().getGameDir().resolve("ouch_export");
 				Files.createDirectories(folder);
 				for (var x : PRESETS.entrySet()) {

@@ -24,21 +24,21 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
     private void onDamageApplied(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             FloatingText.createDamage((LivingEntity) (Object) this, source, amount);
         }
     }
 
     @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
     private void onDamageApplied(DamageSource source, CallbackInfo ci) {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             FloatingText.createDeath((LivingEntity) (Object) this, source);
         }
     }
 
     @Inject(method = "heal", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setHealth(F)V", shift = At.Shift.AFTER))
     private void onHealApplied(float amount, CallbackInfo ci, @Local(ordinal = 1) float oldHealth) {
-        if (!this.getWorld().isClient && oldHealth != this.getHealth()) {
+        if (!this.getEntityWorld().isClient() && oldHealth != this.getHealth()) {
             FloatingText.createHealing((LivingEntity) (Object) this, this.getHealth() - oldHealth);
         }
     }
