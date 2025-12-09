@@ -2,12 +2,12 @@ package eu.pb4.ouch.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import eu.pb4.ouch.FloatingText;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,27 +18,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LivingEntityMixin extends Entity {
     @Shadow public abstract float getHealth();
 
-    public LivingEntityMixin(EntityType<?> type, World world) {
+    public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
-    private void onDamageApplied(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
-        if (!this.getEntityWorld().isClient()) {
+    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;gameEvent(Lnet/minecraft/core/Holder;)V"))
+    private void onDamageApplied(ServerLevel world, DamageSource source, float amount, CallbackInfo ci) {
+        if (!this.level().isClientSide()) {
             FloatingText.createDamage((LivingEntity) (Object) this, source, amount);
         }
     }
 
-    @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;)V"))
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;gameEvent(Lnet/minecraft/core/Holder;)V"))
     private void onDamageApplied(DamageSource source, CallbackInfo ci) {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.level().isClientSide()) {
             FloatingText.createDeath((LivingEntity) (Object) this, source);
         }
     }
 
-    @Inject(method = "heal", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setHealth(F)V", shift = At.Shift.AFTER))
+    @Inject(method = "heal", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V", shift = At.Shift.AFTER))
     private void onHealApplied(float amount, CallbackInfo ci, @Local(ordinal = 1) float oldHealth) {
-        if (!this.getEntityWorld().isClient() && oldHealth != this.getHealth()) {
+        if (!this.level().isClientSide() && oldHealth != this.getHealth()) {
             FloatingText.createHealing((LivingEntity) (Object) this, this.getHealth() - oldHealth);
         }
     }

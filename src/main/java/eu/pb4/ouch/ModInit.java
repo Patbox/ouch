@@ -9,8 +9,8 @@ import com.mojang.serialization.JsonOps;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class ModInit implements ModInitializer {
 	private static Either<String, Preset> configValue = null;
 
 	public static Identifier id(String path) {
-		return Identifier.of(ID, path);
+		return Identifier.fromNamespaceAndPath(ID, path);
 	}
 
 	public static Map<String, Preset> PRESETS = new HashMap<>();
@@ -58,7 +58,7 @@ public class ModInit implements ModInitializer {
 
 	@SuppressWarnings("ConstantValue")
 	private void setup(MinecraftServer server) {
-		var registryManager = server.getRegistryManager();
+		var registryManager = server.registryAccess();
 		PRESETS.clear();
 		Presets.setupPresets(PRESETS::put, registryManager);
 		var gson = new GsonBuilder().disableHtmlEscaping().setStrictness(Strictness.LENIENT).setPrettyPrinting().create();
@@ -69,7 +69,7 @@ public class ModInit implements ModInitializer {
 				Files.createDirectories(path);
 				for (var preset : PRESETS.entrySet()) {
 					Files.writeString(path.resolve(preset.getKey() + ".json"), gson.toJson(Preset.SELF_CODEC.encodeStart(
-							registryManager.getOps(JsonOps.INSTANCE), preset.getValue()
+							registryManager.createSerializationContext(JsonOps.INSTANCE), preset.getValue()
 					).getOrThrow()), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 				}
             } catch (IOException e) {
@@ -86,7 +86,7 @@ public class ModInit implements ModInitializer {
 		} else {
 			try {
 				configValue = Preset.CODEC.decode(
-						registryManager.getOps(JsonOps.INSTANCE), JsonParser.parseString(Files.readString(configPath, StandardCharsets.UTF_8))
+						registryManager.createSerializationContext(JsonOps.INSTANCE), JsonParser.parseString(Files.readString(configPath, StandardCharsets.UTF_8))
 				).getOrThrow().getFirst();
 			} catch (Throwable e) {
 				LOGGER.error("Failed to load config file (ouch.json)", e);
@@ -96,12 +96,12 @@ public class ModInit implements ModInitializer {
 
 		config = configValue.map(x -> PRESETS.getOrDefault(x, Preset.EMPTY), Function.identity());
 		try {
-			if (server.getHostProfile() != null && server.getHostProfile().name().equals("Patbox")) {
+			if (server.getSingleplayerProfile() != null && server.getSingleplayerProfile().name().equals("Patbox")) {
 				var folder = FabricLoader.getInstance().getGameDir().resolve("ouch_export");
 				Files.createDirectories(folder);
 				for (var x : PRESETS.entrySet()) {
 					Files.writeString(folder.resolve(x.getKey() + ".json"), gson.toJson(Preset.SELF_CODEC.encodeStart(
-							registryManager.getOps(JsonOps.INSTANCE), x.getValue()
+							registryManager.createSerializationContext(JsonOps.INSTANCE), x.getValue()
 					).getOrThrow()), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 				}
 			}
@@ -112,7 +112,7 @@ public class ModInit implements ModInitializer {
 
 		try {
 			Files.writeString(configPath, gson.toJson(Preset.CODEC.encodeStart(
-					registryManager.getOps(JsonOps.INSTANCE), configValue
+					registryManager.createSerializationContext(JsonOps.INSTANCE), configValue
 			).getOrThrow()), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		} catch (Throwable e) {
 			LOGGER.error("Failed to write config file (ouch.json)", e);

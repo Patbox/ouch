@@ -6,26 +6,25 @@ import eu.pb4.predicate.api.BuiltinPredicates;
 import eu.pb4.predicate.api.MinecraftPredicate;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.registry.tag.TagKey;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 @SuppressWarnings("unchecked")
 public interface Presets {
     String DEFAULT = "default";
     String MINIMAL = "minimal";
 
-    static void setupPresets(BiConsumer<String, Preset> consumer, RegistryWrapper.WrapperLookup lookup) {
+    static void setupPresets(BiConsumer<String, Preset> consumer, HolderLookup.Provider lookup) {
         consumer.accept(DEFAULT, createDefault(new BuilderImpl(lookup)).build());
         consumer.accept(MINIMAL, createMinimal(new BuilderImpl(lookup)).build());
     }
@@ -47,7 +46,7 @@ public interface Presets {
         builder.addDamage("<#ff0000>-${value}</><blue>\uD83D\uDD28", DamageTypes.MACE_SMASH);
 
         builder.addDamage("<#ff0000>-${value}</><light_gray>\uD83D\uDDE1", DamageTypes.MOB_ATTACK, DamageTypes.PLAYER_ATTACK, DamageTypes.MOB_ATTACK_NO_AGGRO);
-        builder.addDamage("<#ff0000>-${value}</><yellow>⚠", DamageTypes.OUT_OF_WORLD, DamageTypes.OUTSIDE_BORDER);
+        builder.addDamage("<#ff0000>-${value}</><yellow>⚠", DamageTypes.FELL_OUT_OF_WORLD, DamageTypes.OUTSIDE_BORDER);
         builder.addDamage("<#ff0000>-${value}</><purple>\uD83E\uDDEA", DamageTypes.MAGIC, DamageTypes.INDIRECT_MAGIC, DamageTypes.DRAGON_BREATH);
         builder.addDamage("<#ff0000>-${value}</><dark_gray>\uD83E\uDDEA", DamageTypes.WITHER, DamageTypes.WITHER_SKULL);
         builder.addDamage("<#ff0000>-${value}</><dark_green>♦", DamageTypes.CACTUS, DamageTypes.SWEET_BERRY_BUSH);
@@ -78,12 +77,12 @@ public interface Presets {
     }
 
     class BuilderImpl implements PresetCreationEvents.AppendDisplayLogic.Builder {
-        RegistryWrapper.WrapperLookup lookup;
+        HolderLookup.Provider lookup;
         Int2ObjectMap<List<Pair<Integer, DamageDisplayLogic>>> damageDisplays = new Int2ObjectOpenHashMap<>();
         Int2ObjectMap<List<Pair<Integer, HealDisplayLogic>>> healingDisplays = new Int2ObjectOpenHashMap<>();
         Int2ObjectMap<List<Pair<Integer, DamageDisplayLogic>>> deathDisplays = new Int2ObjectOpenHashMap<>();
 
-        public BuilderImpl(RegistryWrapper.WrapperLookup lookup) {
+        public BuilderImpl(HolderLookup.Provider lookup) {
             this.lookup = lookup;
         }
 
@@ -100,10 +99,10 @@ public interface Presets {
         }
 
         private static <T> void sortAndAdd(List<List<T>> out, Int2ObjectMap<List<Pair<Integer, T>>> entries, Function<T, Float> chance,
-                                    Function<T, Optional<RegistryEntryList<DamageType>>> damageTypes, Function<T, FloatRange> range) {
+                                    Function<T, Optional<HolderSet<DamageType>>> damageTypes, Function<T, FloatRange> range) {
             var entriesList = new ArrayList<>(entries.int2ObjectEntrySet());
             var comparator = Comparator.<Pair<Integer, T>>comparingInt(Pair::getFirst)
-                    .thenComparingInt(x -> damageTypes.apply(x.getSecond()).map(registryEntries -> registryEntries.getTagKey().isPresent() ? 3 : 1).orElse(5))
+                    .thenComparingInt(x -> damageTypes.apply(x.getSecond()).map(registryEntries -> registryEntries.unwrapKey().isPresent() ? 3 : 1).orElse(5))
                     .thenComparingDouble(x -> chance.apply(x.getSecond()))
                     .thenComparingDouble(x -> range.apply(x.getSecond()).size());
 
@@ -115,7 +114,7 @@ public interface Presets {
         }
 
         @Override
-        public void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
+        public void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, ResourceKey<DamageType>... types) {
             this.damageDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
                     .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
         }
@@ -127,7 +126,7 @@ public interface Presets {
         }
 
         @Override
-        public void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types) {
+        public void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, ResourceKey<DamageType>... types) {
             this.deathDisplays.computeIfAbsent(layer, x -> new ArrayList<>())
                     .add(new Pair<>(priority, DamageDisplayLogic.of(lookup, format, range, chance, victimPredicate, sourcePredicate, attackerPredicate, types)));
         }

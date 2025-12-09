@@ -4,9 +4,9 @@ import eu.pb4.predicate.api.BuiltinPredicates;
 import eu.pb4.predicate.api.MinecraftPredicate;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 import org.jetbrains.annotations.ApiStatus;
 
 public final class PresetCreationEvents {
@@ -39,10 +39,10 @@ public final class PresetCreationEvents {
 		@ApiStatus.NonExtendable
 		@SuppressWarnings("unchecked")
 		interface Builder {
-			default void addDamage(String format, RegistryKey<DamageType>... types) {
+			default void addDamage(String format, ResourceKey<DamageType>... types) {
 				addDamage(format, 1, types);
 			};
-			default void addDamage(int layer, String format, RegistryKey<DamageType>... types) {
+			default void addDamage(int layer, String format, ResourceKey<DamageType>... types) {
 				addDamage(layer, format, 1, types);
 			}
 			default void addDamage(String format, TagKey<DamageType> tag) {
@@ -52,33 +52,33 @@ public final class PresetCreationEvents {
 				addDamage(layer, format, 1, tag);
 			}
 
-			default void addDamage(String format, float chance, RegistryKey<DamageType>... types) {
+			default void addDamage(String format, float chance, ResourceKey<DamageType>... types) {
 				addDamage(0, format, chance, types);
 			}
 			default void addDamage(String format, float chance, TagKey<DamageType> tag) {
 				addDamage(0, format, chance, tag);
 			}
-			default void addDamage(int layer, String format, float chance, RegistryKey<DamageType>... types) {
+			default void addDamage(int layer, String format, float chance, ResourceKey<DamageType>... types) {
 				addDamage(0, format, chance, BuiltinPredicates.alwaysTrue(), types);
 			};
 			default void addDamage(int layer, String format, float chance, TagKey<DamageType> tag) {
 				addDamage(0, format, chance, BuiltinPredicates.alwaysTrue(), tag);
 			}
 
-			default void addDamage(int layer, String format, float chance, MinecraftPredicate victimPredicate, RegistryKey<DamageType>... types) {
+			default void addDamage(int layer, String format, float chance, MinecraftPredicate victimPredicate, ResourceKey<DamageType>... types) {
 				addDamage(layer, 100, format, FloatRange.ALL, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), types);
 			};
 			default void addDamage(int layer, String format, float chance, MinecraftPredicate victimPredicate, TagKey<DamageType> tag) {
 				addDamage(layer, 200, format, FloatRange.ALL, chance,  victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), tag);
 			};
 
-			void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types);
+			void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, ResourceKey<DamageType>... types);
 			void addDamage(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag);
 
-			default void addDeath(String format, RegistryKey<DamageType>... types) {
+			default void addDeath(String format, ResourceKey<DamageType>... types) {
 				addDeath(format, 1, types);
 			};
-			default void addDeath(int layer, String format, RegistryKey<DamageType>... types) {
+			default void addDeath(int layer, String format, ResourceKey<DamageType>... types) {
 				addDeath(layer, format, 1, types);
 			}
 			default void addDeath(String format, TagKey<DamageType> tag) {
@@ -88,27 +88,27 @@ public final class PresetCreationEvents {
 				addDeath(layer, format, 1, tag);
 			}
 
-			default void addDeath(String format, float chance, RegistryKey<DamageType>... types) {
+			default void addDeath(String format, float chance, ResourceKey<DamageType>... types) {
 				addDeath(0, format, chance, types);
 			}
 			default void addDeath(String format, float chance, TagKey<DamageType> tag) {
 				addDeath(0, format, chance, tag);
 			}
-			default void addDeath(int layer, String format, float chance, RegistryKey<DamageType>... types) {
+			default void addDeath(int layer, String format, float chance, ResourceKey<DamageType>... types) {
 				addDeath(0, format, chance, BuiltinPredicates.alwaysTrue(), types);
 			};
 			default void addDeath(int layer, String format, float chance, TagKey<DamageType> tag) {
 				addDeath(0, format, chance, BuiltinPredicates.alwaysTrue(), tag);
 			}
 
-			default void addDeath(int layer, String format, float chance, MinecraftPredicate victimPredicate, RegistryKey<DamageType>... types) {
+			default void addDeath(int layer, String format, float chance, MinecraftPredicate victimPredicate, ResourceKey<DamageType>... types) {
 				addDeath(layer, 100, format, FloatRange.ALL, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), types);
 			};
 			default void addDeath(int layer, String format, float chance, MinecraftPredicate victimPredicate, TagKey<DamageType> tag) {
 				addDeath(layer, 200, format, FloatRange.ALL, chance, victimPredicate, BuiltinPredicates.alwaysTrue(), BuiltinPredicates.alwaysTrue(), tag);
 			};
 
-			void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, RegistryKey<DamageType>... types);
+			void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, ResourceKey<DamageType>... types);
 			void addDeath(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate victimPredicate, MinecraftPredicate sourcePredicate, MinecraftPredicate attackerPredicate, TagKey<DamageType> tag);
 
 			void addHealing(int layer, int priority, String format, FloatRange range, float chance, MinecraftPredicate entityPredicate);

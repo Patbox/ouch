@@ -4,9 +4,9 @@
   "package": "eu.pb4.ouch.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ArmorStandEntityMixin",
+    "ArmorStandMixin",
     "LivingEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerMixin"
   ],
   "client": [
   ],
