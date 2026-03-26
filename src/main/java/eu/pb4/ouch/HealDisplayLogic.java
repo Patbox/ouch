@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.ouch.api.FloatRange;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.ServerPlaceholderContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.WrappedText;
 import eu.pb4.predicate.api.BuiltinPredicates;
@@ -38,7 +39,7 @@ public record HealDisplayLogic(MinecraftPredicate entityPredicate,
     }
 
     public void provide(LivingEntity entity, float amount, BiConsumer<Component, FloatingText.DisplaySettings> consumer) {
-        consumer.accept(this.text.textNode().toText(PlaceholderContext.of(entity).asParserContext().with(PLACEHOLDER_KEY, key -> switch (key) {
+        consumer.accept(this.text.textNode().toComponent(ServerPlaceholderContext.of(entity).asParserContext().with(PLACEHOLDER_KEY, key -> switch (key) {
             case "value" -> Component.literal(Mth.floor(amount) + "." + (Mth.floor(amount * 10) % 10));
             case "value_rounded" -> Component.literal("" + Math.round(amount));
             case "value_raw" -> Component.literal("" + amount);
