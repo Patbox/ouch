@@ -19,8 +19,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
@@ -46,7 +46,7 @@ public record DamageDisplayLogic(Optional<HolderSet<DamageType>> type,
             .build();
 
     public static final Codec<DamageDisplayLogic> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryCodecs.homogeneousList(Registries.DAMAGE_TYPE).optionalFieldOf("type").forGetter(DamageDisplayLogic::type),
+            RegistryCodecs.holderSet(Registries.DAMAGE_TYPE).optionalFieldOf("type").forGetter(DamageDisplayLogic::type),
             PredicateRegistry.CODEC.optionalFieldOf("victim", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::victimPredicate),
             PredicateRegistry.CODEC.optionalFieldOf("attacker", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::attackerPredicate),
             PredicateRegistry.CODEC.optionalFieldOf("source", BuiltinPredicates.alwaysTrue()).forGetter(DamageDisplayLogic::sourcePredicate),

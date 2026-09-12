@@ -32,7 +32,7 @@ public abstract class ArmorStandMixin extends LivingEntity {
         this.createText(source, amount);
     }
 
-    @Inject(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;)V"))
+    @Inject(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V"))
     private void onDamageApplied3(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.createText(source, amount);
     }

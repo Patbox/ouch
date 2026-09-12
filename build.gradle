@@ -57,9 +57,9 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	implementation include('eu.pb4:polymer-virtual-entity:0.17.0+26.2-rc-2')
-	implementation include("eu.pb4:placeholder-api:3.1.0-beta.1+26.2")
-	implementation include('eu.pb4:predicate-api:0.9.0+26.2')
+	implementation include('eu.pb4:polymer-virtual-entity:0.18.0+26.3-rc-1')
+	implementation include("eu.pb4:placeholder-api:3.2.0+26.3")
+	implementation include('eu.pb4:predicate-api:0.10.0+26.3')
 }
 
 processResources {
